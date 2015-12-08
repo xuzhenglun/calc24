@@ -1,11 +1,21 @@
-package main
+package calc24
 
 import "fmt"
 
-func main() {
-	var a, b, c, d int
-	fmt.Print("Input 4 int:  ")
-	fmt.Scanf("%d %d %d %d", &a, &b, &c, &d)
+type Game struct {
+	A, B, C, D int
+	Ans        string
+	Winer      string
+}
+
+func (this Game) CalcAnswer() (answer string, ifResult bool) {
+
+	ifResult = true
+	a := this.A
+	b := this.B
+	c := this.C
+	d := this.D
+
 	In := [...]float32{float32(a), float32(b), float32(c), float32(d)}
 
 	I := [...]int32{
@@ -48,33 +58,28 @@ func main() {
 			m3 := calc(j&0x03, In[index3], In[index4])
 
 			if calc(j&0x03, calc(j>>2&0x03, m1, In[index3]), In[index4]) == 24.0 {
-				fmt.Printf("((%d%c%d)%c%d)%c%d=24\n", int(In[index1]), MARK[j>>4], int(In[index2]), MARK[j>>2&0x03],
-					int(In[index3]), MARK[j&0x03], int(In[index4]))
-				return
+				return fmt.Sprintf("((%d%c%d)%c%d)%c%d=24\n", int(In[index1]), MARK[j>>4], int(In[index2]), MARK[j>>2&0x03],
+					int(In[index3]), MARK[j&0x03], int(In[index4])), ifResult
 			}
 			if calc(j>>2&0x03, m1, m3) == 24.0 {
-				fmt.Printf("(%d%c%d)%c(%d%c%d)=24\n", int(In[index1]), MARK[j>>4], int(In[index2]), MARK[j>>2&0x03],
-					int(In[index3]), MARK[j&0x03], int(In[index4]))
-				return
+				return fmt.Sprintf("(%d%c%d)%c(%d%c%d)=24\n", int(In[index1]), MARK[j>>4], int(In[index2]), MARK[j>>2&0x03],
+					int(In[index3]), MARK[j&0x03], int(In[index4])), ifResult
 			}
 			if calc(j&0x03, calc(j>>4&0x03, In[index1], m2), In[index4]) == 24.0 {
-				fmt.Printf("(%d%c(%d%c%d))%c%d=24\n", int(In[index1]), MARK[j>>4], int(In[index2]), MARK[j>>2&0x03],
-					int(In[index3]), MARK[j&0x03], int(In[index4]))
-				return
+				return fmt.Sprintf("(%d%c(%d%c%d))%c%d=24\n", int(In[index1]), MARK[j>>4], int(In[index2]), MARK[j>>2&0x03],
+					int(In[index3]), MARK[j&0x03], int(In[index4])), ifResult
 			}
 			if calc(j>>4, In[index1], calc(j&0x03, m2, In[index4])) == 24.0 {
-				fmt.Printf("%d%c((%d%c%d)%c%d)=24\n", int(In[index1]), MARK[j>>4], int(In[index2]), MARK[j>>2&0x03],
-					int(In[index3]), MARK[j&0x03], int(In[index4]))
-				return
+				return fmt.Sprintf("%d%c((%d%c%d)%c%d)=24\n", int(In[index1]), MARK[j>>4], int(In[index2]), MARK[j>>2&0x03],
+					int(In[index3]), MARK[j&0x03], int(In[index4])), ifResult
 			}
 			if calc(j>>4, In[index1], calc(j>>2&0x03, In[index2], m3)) == 24.0 {
-				fmt.Printf("%d%c(%d%c(%d%c%d))=24\n", int(In[index1]), MARK[j>>4], int(In[index2]), MARK[j>>2&0x03],
-					int(In[index3]), MARK[j&0x03], int(In[index4]))
-				return
+				return fmt.Sprintf("%d%c(%d%c(%d%c%d))=24\n", int(In[index1]), MARK[j>>4], int(In[index2]), MARK[j>>2&0x03],
+					int(In[index3]), MARK[j&0x03], int(In[index4])), ifResult
 			}
 		}
 	}
-	fmt.Println("No Answer!!!")
+	return fmt.Sprintln("No Answer!!!"), false
 }
 
 func calc(t int, a, b float32) float32 {
