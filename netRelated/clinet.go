@@ -39,27 +39,29 @@ func Client() {
 		}
 	}()
 
-	fmt.Printf("Name yourself:")
-	fmt.Scanf("%s", &name)
+	for {
+		fmt.Printf("Name yourself:")
+		fmt.Scanf("%s", &name)
+		if name == "" {
+			fmt.Println("Empty Name,Try again")
+		} else {
+			fmt.Println("Wait for other players")
+			break
+		}
+	}
 
-	m := md5.New()
-	for i := 0; i < len(name); i++ {
+	for i := 0; i < len(name) && i < 10; i++ {
 		buf[32+i] = name[i]
 	}
-	for i := 0; i < len("ready"); i++ {
-		buf[10+32+i] = "ready"[i]
-	}
-	io.WriteString(m, string(buf[32:len("ready")+32+10]))
-	hash := fmt.Sprintf("%x", m.Sum(nil))
-	for i := 0; i < len(hash); i++ {
-		buf[i] = hash[i]
-	}
+
+	hashlize(&buf, "ready")
 	conn.Write([]byte(buf[:]))
 
 	time.Sleep(time.Second)
 
 	for {
 		var answer string
+		fmt.Printf(">>>")
 		fmt.Scanf("%s", &answer)
 		hashlize(&buf, answer)
 		conn.Write([]byte(buf[:]))
@@ -67,6 +69,9 @@ func Client() {
 }
 
 func hashlize(buf *[512]byte, str string) {
+	if str == "" {
+		return
+	}
 	m := md5.New()
 	for i := 0; i < len(str); i++ {
 		buf[10+32+i] = str[i]
@@ -75,5 +80,8 @@ func hashlize(buf *[512]byte, str string) {
 	hash := fmt.Sprintf("%x", m.Sum(nil))
 	for i := 0; i < len(hash); i++ {
 		buf[i] = hash[i]
+	}
+	for i := 32 + 10 + len(str); i < len(buf); i++ {
+		buf[i] = 0
 	}
 }
