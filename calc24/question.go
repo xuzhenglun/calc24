@@ -1,11 +1,22 @@
 package calc24
 
-import "fmt"
+import (
+	"fmt"
+	"math/rand"
+	"time"
+)
 
 type Game struct {
+	Secret
+	Question
+}
+type Question struct {
 	A, B, C, D int
-	Ans        string
-	Winer      string
+}
+
+type Secret struct {
+	Ans   string
+	Winer string
 }
 
 func (this Game) CalcAnswer() (answer string, ifResult bool) {
@@ -95,4 +106,27 @@ func calc(t int, a, b float32) float32 {
 	}
 
 	return 0.0
+}
+
+func rander() int {
+	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
+	vcode := rnd.Intn(12) + 1
+	return vcode
+
+}
+
+func New() Game {
+	var game Game
+	ok := false
+	for {
+		game.A = rander()
+		game.B = rander()
+		game.C = rander()
+		game.D = rander()
+		if game.Ans, ok = game.CalcAnswer(); ok {
+			break
+		}
+	}
+	game.Winer = ""
+	return game
 }

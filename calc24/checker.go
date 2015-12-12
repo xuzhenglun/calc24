@@ -5,12 +5,16 @@ import (
 	"log"
 )
 
-func Check(str string) float64 {
+func Check(str string) bool {
 	ans, err := gocalc.Calc(str)
 	if err != nil {
 		log.Println(err)
-		return -1
+		return false
 	}
 	log.Printf("%s=%f", str, ans)
-	return ans
+	if ans == 24.0 {
+		return true
+	} else {
+		return false
+	}
 }

@@ -5,8 +5,9 @@ import (
 )
 
 func main() {
+	netRelated.Conf.Port = "12345"
+	netRelated.Conf.ListernIp = "0.0.0.0"
+	netRelated.Conf.NumPreGroup = 4
 	var server netRelated.Server
-	server.Port = "12345"
-	server.ListernIp = "0.0.0.0"
-	server.Listen()
+	server.Start()
 }
