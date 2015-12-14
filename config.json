@@ -1,6 +1,6 @@
 {
     "NumPreGroup":4,
     "RemoteIP":"127.0.0.1",
-    "Port":"12345"
+    "Port":"12345",
     "ListernIP":"127.0.0.1"
 }

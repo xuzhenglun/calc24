@@ -5,7 +5,7 @@ import (
 	"log"
 )
 
-func Check(str string) bool {
+func (this *Question) Check(str string) bool {
 	ans, err := gocalc.Calc(str)
 	if err != nil {
 		log.Println(err)
@@ -17,4 +17,4 @@ func Check(str string) bool {
 	} else {
 		return false
 	}
-}
+} //ToDO:  auth 4 number weather is belog to the game

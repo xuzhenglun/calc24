@@ -13,6 +13,8 @@ type Config struct {
 	RemoteIP    string
 	Port        string
 	ListernIp   string
+	Name        string
+	Hash        string
 }
 
 func (this *Config) GetConfig() bool {
@@ -40,6 +42,5 @@ func (this *Config) GetConfig() bool {
 	if err != nil {
 		return false
 	}
-	log.Println(this)
 	return true
 }

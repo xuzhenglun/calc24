@@ -1,10 +1,11 @@
 package netRelated
 
 import (
-	"bytes"
+	//"bytes"
 	"encoding/base64"
 	"encoding/json"
 	"github.com/xuzhenglun/calc24-muti/conf"
+	"github.com/xuzhenglun/calc24-muti/user"
 	"log"
 	"net"
 )
@@ -16,9 +17,13 @@ type Server struct {
 }
 
 var Conf config.Config
-var groups map[string]Group
+var groups map[string]*Group
+var Clients map[string]string
 
 func (this *Server) Start() {
+	groups = make(map[string]*Group)
+	Clients = make(map[string]string)
+
 	if Conf.ListernIp != "" {
 		Conf.GetConfig()
 	}
@@ -33,10 +38,10 @@ func (this *Server) Start() {
 	if err != nil {
 		panic(err)
 	}
+	log.Printf("Listern at %v:%v", this.ListernIp, this.ListernPort)
 
 	for {
-		log.Printf("Listern at %v:%v", this.ListernIp, this.ListernPort)
-		buf := make([]byte, 512)
+		buf := make([]byte, 2048)
 		len, addr, err := conn.ReadFromUDP(buf)
 		if err != nil {
 			log.Println(err)
@@ -47,8 +52,7 @@ func (this *Server) Start() {
 }
 
 func connectHandler(conn *net.UDPConn, len int, addr *net.UDPAddr, buf []byte) {
-	buf = bytes.TrimSpace(buf)
-	jsonReq, err := base64.StdEncoding.DecodeString(string(buf))
+	jsonReq, err := base64.StdEncoding.DecodeString(string(buf[0:len]))
 	if err != nil {
 		log.Println("BAD requset")
 		return
@@ -56,31 +60,30 @@ func connectHandler(conn *net.UDPConn, len int, addr *net.UDPAddr, buf []byte) {
 	var req Information
 	err = json.Unmarshal(jsonReq, &req)
 	if err != nil {
-		log.Panicln("Json decode fail")
+		log.Println("Json decode fail")
+		return
 	}
-	log.Println(req)
 
 	req.ClientAddr = addr
 
-	log.Printf("%s Joined whose Hash is %s,and he/she want to do Action %d", req.ClientName, req.ClientHash, req.Status)
-	log.Printf("Extre Info he/she come with is %v", req.Info)
-
+	clientUUID := user.GenUUID(req.ClientHash, req.ClientName)
 	switch req.Status {
 	case 0: //Start a new game request
 		for _, group := range groups {
+			log.Println("looking for old group")
 			if group.Now < Conf.NumPreGroup {
+				Clients[clientUUID] = group.UUID
 				group.date <- &req
-				group.Now++
 				return
 			}
 		}
-		var newgroup Group
-		newgroup.UUID = req.GroupUUID
-		newgroup.Now = 1
-		groups[req.GroupUUID] = newgroup
-		newgroup.RunGroup()
+		log.Println("create new group")
+		newgroup := NewGroup(&req, conn)
+		groups[newgroup.UUID] = newgroup
 		newgroup.date <- &req
-	case 1:
-		groups[req.GroupUUID].date <- &req
+		Clients[clientUUID] = newgroup.UUID
+		newgroup.RunGroup()
+	case 1: //game date
+		groups[Clients[clientUUID]].date <- &req
 	}
 }

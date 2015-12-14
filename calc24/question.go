@@ -2,6 +2,7 @@ package calc24
 
 import (
 	"fmt"
+	"log"
 	"math/rand"
 	"time"
 )
@@ -127,6 +128,7 @@ func New() Game {
 			break
 		}
 	}
+	log.Println(game)
 	game.Winer = ""
 	return game
 }
