@@ -32,7 +32,7 @@ func Client() {
 		var name, passwd string
 		for {
 			fmt.Printf("Name yourself:")
-			fmt.Scanf("%s", &name)
+			fmt.Scan(&name)
 			if name == "" {
 				fmt.Printf("Empty Name,Try again:")
 			} else {
@@ -41,7 +41,7 @@ func Client() {
 		}
 		for {
 			fmt.Printf("Enter a password:")
-			fmt.Scanf("%s", &passwd)
+			fmt.Scan(&passwd)
 			if passwd == "" {
 				fmt.Printf("Please Enter Password:")
 			} else {
@@ -63,7 +63,7 @@ func Client() {
 	done := make(chan bool, 5)
 	for {
 		fmt.Printf("Enter \"Ready\" to find a game.\n>>>")
-		fmt.Scanf("%s", &input)
+		fmt.Scan(&input)
 		if input == "Ready" {
 			go func() {
 				for {
@@ -172,8 +172,13 @@ func startGame(res <-chan *tellClient, input chan string) {
 
 func typing(ans chan<- string) {
 	var input string
-	fmt.Printf("Answer>>>")
-	fmt.Scanf("%s", &input)
+	for {
+		fmt.Printf("Answer>>>")
+		fmt.Scan(&input)
+		if input != "" {
+			break
+		}
+	}
 	ans <- input
 }
 

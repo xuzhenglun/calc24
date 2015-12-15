@@ -88,7 +88,7 @@ func (this Group) RunGroup() {
 			return
 		}
 
-		if game.Check(ans.Info) {
+		if ans.Info != "" && game.Check(ans.Info) {
 			var info tellClient
 			info.Status = 2
 			var secret calc24.Secret
