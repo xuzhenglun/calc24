@@ -1,4 +1,4 @@
-package netRelated
+﻿package netRelated
 
 import (
 	"crypto/md5"
@@ -8,6 +8,9 @@ import (
 	"github.com/xuzhenglun/calc24-muti/conf"
 	"net"
 	"time"
+	"os"
+	"bufio"
+	"strings"
 )
 
 var conf config.Config
@@ -32,7 +35,7 @@ func Client() {
 		var name, passwd string
 		for {
 			fmt.Printf("Name yourself:")
-			fmt.Scan(&name)
+			name = scan()
 			if name == "" {
 				fmt.Printf("Empty Name,Try again:")
 			} else {
@@ -41,7 +44,7 @@ func Client() {
 		}
 		for {
 			fmt.Printf("Enter a password:")
-			fmt.Scan(&passwd)
+			passwd = scan()
 			if passwd == "" {
 				fmt.Printf("Please Enter Password:")
 			} else {
@@ -59,11 +62,13 @@ func Client() {
 		//conf.SaveConfig()
 	}
 
-	var input string
+
 	done := make(chan bool, 5)
 	for {
 		fmt.Printf("Enter \"Ready\" to find a game.\n>>>")
-		fmt.Scan(&input)
+		input := scan()
+		fmt.Printf("%x\n",input)
+		fmt.Printf("%x\n","Ready")
 		if input == "Ready" {
 			go func() {
 				for {
@@ -174,7 +179,7 @@ func typing(ans chan<- string) {
 	var input string
 	for {
 		fmt.Printf("Answer>>>")
-		fmt.Scan(&input)
+		input = scan()
 		if input != "" {
 			break
 		}
@@ -190,4 +195,10 @@ func recvall(res chan<- *tellClient) {
 			return
 		}
 	}
+}
+
+func scan() string{
+	reader := bufio.NewReader(os.Stdin)
+	s ,_ := reader.ReadString('\n')
+	return strings.TrimSpace(s)
 }
