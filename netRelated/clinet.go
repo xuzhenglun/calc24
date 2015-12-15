@@ -66,8 +66,6 @@ func Client() {
 	for {
 		fmt.Printf("Enter \"Ready\" to find a new game.\n>>>")
 		input := scan()
-		fmt.Printf("%x\n", input)
-		fmt.Printf("%x\n", "Ready")
 		if input == "Ready" {
 			go func() {
 				for {
