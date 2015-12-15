@@ -1,16 +1,16 @@
-﻿package netRelated
+package netRelated
 
 import (
+	"bufio"
 	"crypto/md5"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"github.com/xuzhenglun/calc24-muti/conf"
 	"net"
-	"time"
 	"os"
-	"bufio"
 	"strings"
+	"time"
 )
 
 var conf config.Config
@@ -62,13 +62,12 @@ func Client() {
 		//conf.SaveConfig()
 	}
 
-
 	done := make(chan bool, 5)
 	for {
-		fmt.Printf("Enter \"Ready\" to find a game.\n>>>")
+		fmt.Printf("Enter \"Ready\" to find a new game.\n>>>")
 		input := scan()
-		fmt.Printf("%x\n",input)
-		fmt.Printf("%x\n","Ready")
+		fmt.Printf("%x\n", input)
+		fmt.Printf("%x\n", "Ready")
 		if input == "Ready" {
 			go func() {
 				for {
@@ -158,16 +157,31 @@ func startGame(res <-chan *tellClient, input chan string) {
 					go typing(input)
 				}
 			case 2:
-				fmt.Println("▂▃▄▅▆▇█Game Over█▇▆▅▄▃▂▁")
+
+				//fmt.Println("▂▃▄▅▆▇█Game Over█▇▆▅▄▃▂▁")
 				if notify, ok := response.Info.(map[string]interface{}); ok {
-					fmt.Printf("Winder is %s and the Answer is %s.\n",
-						notify["Winer"].(string), notify["Ans"].(string))
-					return
+					winer := notify["Winer"].(string)
+					ans := notify["Ans"].(string)
+					if winer != conf.Name {
+						fmt.Println("\n▂▃▄▅▆▇█ Defeated █▇▆▅▄▃▂▁\n")
+						fmt.Println("▂▃▄▅▆▇█You Losted█▇▆▅▄▃▂▁\n")
+						fmt.Printf(
+							"Winder is %s and the Answer is %s.\nPress \"Enter\" to continue\n",
+							winer, ans)
+						<-input
+						return
+					} else {
+						fmt.Printf("Congrations, You Wined.\n")
+						return
+					}
 				}
 			default:
 				continue
 			}
 		case str := <-input:
+			if str == "" {
+				return
+			}
 			sendmsg(1, str)
 		default:
 			time.Sleep(100 * time.Millisecond)
@@ -177,13 +191,8 @@ func startGame(res <-chan *tellClient, input chan string) {
 
 func typing(ans chan<- string) {
 	var input string
-	for {
-		fmt.Printf("Answer>>>")
-		input = scan()
-		if input != "" {
-			break
-		}
-	}
+	fmt.Printf("Answer>>>")
+	input = scan()
 	ans <- input
 }
 
@@ -197,8 +206,8 @@ func recvall(res chan<- *tellClient) {
 	}
 }
 
-func scan() string{
+func scan() string {
 	reader := bufio.NewReader(os.Stdin)
-	s ,_ := reader.ReadString('\n')
+	s, _ := reader.ReadString('\n')
 	return strings.TrimSpace(s)
 }
