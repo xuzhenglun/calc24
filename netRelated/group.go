@@ -10,6 +10,7 @@ import (
 	"log"
 	"math/rand"
 	"net"
+	"sync"
 	"time"
 )
 
@@ -20,6 +21,7 @@ type Group struct {
 	date     chan *Information
 	UUID     string
 	Now      int
+	mux      sync.RWMutex
 }
 
 type Information struct {
@@ -36,6 +38,9 @@ type tellClient struct {
 }
 
 func (this Group) NotifiyAll(date []byte) {
+	this.mux.RLock()
+	defer this.mux.RUnlock()
+
 	for _, client := range this.Clients {
 		go func(date []byte, client *net.UDPAddr) {
 			log.Printf("Notifiy %v with date :%v", client, date)
@@ -60,9 +65,13 @@ func (this Group) RunGroup() {
 			newClient.Addr = req.ClientAddr
 			newClient.Name = req.ClientName
 			clientUUID := newClient.GenUUID(req.ClientHash)
+			this.mux.Lock()
 			this.Clients[clientUUID] = newClient
+			this.mux.Unlock()
 			this.Now++
+			groupmux.Lock()
 			groups[this.UUID] = &this
+			groupmux.Unlock()
 			log.Println("group Add a new client,Now have " + string(this.Now+'0') + " and we need " + string(Conf.NumPreGroup+'0'))
 		} else {
 			break

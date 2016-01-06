@@ -18,7 +18,7 @@
 
  - 可能存在各种BUG
  - calc24-muti.Check()还是处于偷懒状态，过段时间学习下正则再完善
- - 
+ - Alive Dective and Remove Dead Client
  
 
 

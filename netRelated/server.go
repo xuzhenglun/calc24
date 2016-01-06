@@ -8,6 +8,7 @@ import (
 	"github.com/xuzhenglun/calc24-muti/user"
 	"log"
 	"net"
+	"sync"
 )
 
 type Server struct {
@@ -19,6 +20,8 @@ type Server struct {
 var Conf config.Config
 var groups map[string]*Group
 var Clients map[string]string
+var groupmux sync.RWMutex
+var clientmux sync.RWMutex
 
 func (this *Server) Start() {
 	groups = make(map[string]*Group)
@@ -69,21 +72,38 @@ func connectHandler(conn *net.UDPConn, len int, addr *net.UDPAddr, buf []byte) {
 	clientUUID := user.GenUUID(req.ClientHash, req.ClientName)
 	switch req.Status {
 	case 0: //Start a new game request
+		groupmux.RLock()
+
 		for _, group := range groups {
 			log.Println("looking for old group")
 			if group.Now < Conf.NumPreGroup {
+				clientmux.Lock()
 				Clients[clientUUID] = group.UUID
+				clientmux.Unlock()
 				group.date <- &req
+				groupmux.RUnlock()
 				return
 			}
 		}
+		groupmux.RUnlock()
+
 		log.Println("create new group")
 		newgroup := NewGroup(&req, conn)
+		groupmux.Lock()
 		groups[newgroup.UUID] = newgroup
+		groupmux.Unlock()
 		newgroup.date <- &req
+		clientmux.Lock()
 		Clients[clientUUID] = newgroup.UUID
+		clientmux.Unlock()
 		newgroup.RunGroup()
 	case 1: //game date
-		groups[Clients[clientUUID]].date <- &req
+		clientmux.RLock()
+		c := Clients[clientUUID]
+		clientmux.RUnlock()
+
+		groupmux.Lock()
+		groups[c].date <- &req
+		groupmux.Unlock()
 	}
 }
