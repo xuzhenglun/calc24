@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+	"sort"
 	"time"
 )
 
@@ -20,13 +21,14 @@ type Secret struct {
 	Winer string
 }
 
-func (this Game) CalcAnswer() (answer string, ifResult bool) {
+func (this Game) CalcAnswer(quenum []int) (answer string, ifResult bool) {
 
 	ifResult = true
-	a := this.A
-	b := this.B
-	c := this.C
-	d := this.D
+	a := quenum[0]
+	b := quenum[1]
+	c := quenum[2]
+	d := quenum[3]
+	log.Println(quenum)
 
 	In := [...]float32{float32(a), float32(b), float32(c), float32(d)}
 
@@ -119,15 +121,22 @@ func rander() int {
 func New() Game {
 	var game Game
 	ok := false
+	quenum := make([]int, 4)
 	for {
-		game.A = rander()
-		game.B = rander()
-		game.C = rander()
-		game.D = rander()
-		if game.Ans, ok = game.CalcAnswer(); ok {
+		for i := 0; i < 4; i++ {
+			quenum[i] = rander()
+		}
+		if game.Ans, ok = game.CalcAnswer(quenum); ok {
 			break
 		}
 	}
+
+	sort.Ints(quenum)
+	game.A = quenum[0]
+	game.B = quenum[1]
+	game.C = quenum[2]
+	game.D = quenum[3]
+
 	log.Println(game)
 	game.Winer = ""
 	return game
